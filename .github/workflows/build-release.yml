@@ -1,0 +1,42 @@
+name: Build Release
+
+# 仅手动触发：仓库 Actions 页面 → Build Release → Run workflow，填写版本号
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release 版本号（如 1.0.1），会自动生成 v1.0.1 标签并上传 LidKeep.zip"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 校验版本号
+        env:
+          VERSION: ${{ github.event.inputs.version }}
+        run: |
+          VERSION="${VERSION#v}"
+          if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ 版本号格式不正确，应为 x.y.z（如 1.0.1）" >&2
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_ENV"
+
+      - name: 编译 LidKeep
+        run: APP_VERSION="$version" ./build.sh
+
+      - name: 创建 GitHub Release 并上传
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "v$version" LidKeep.zip \
+            --title "LidKeep v$version" \
+            --notes "LidKeep v$version（手动构建发布）"
+          echo "✅ Release 已发布：https://github.com/ownlight6/lidkeep/releases/tag/v$version"

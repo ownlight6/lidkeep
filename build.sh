@@ -6,6 +6,8 @@ set -euo pipefail
 APP="LidKeep.app"
 BUILD="build"
 DEPLOY_TARGET="12.0"
+# 版本号默认 1.0.0，CI 中可用 APP_VERSION 环境变量覆盖（如：APP_VERSION=1.0.1 ./build.sh）
+VERSION="${APP_VERSION:-1.0.0}"
 
 rm -rf "$BUILD" "$APP"
 mkdir -p "$BUILD" "$APP/Contents/MacOS"
@@ -28,8 +30,8 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleName</key><string>LidKeep</string>
     <key>CFBundleDisplayName</key><string>LidKeep</string>
     <key>CFBundleIdentifier</key><string>com.ownlight6.lidkeep</string>
-    <key>CFBundleVersion</key><string>1.0.0</string>
-    <key>CFBundleShortVersionString</key><string>1.0.0</string>
+    <key>CFBundleVersion</key><string>${VERSION}</string>
+    <key>CFBundleShortVersionString</key><string>${VERSION}</string>
     <key>CFBundleExecutable</key><string>LidKeep</string>
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>LSMinimumSystemVersion</key><string>${DEPLOY_TARGET}</string>
