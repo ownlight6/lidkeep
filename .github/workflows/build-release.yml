@@ -32,11 +32,15 @@ jobs:
       - name: 编译 LidKeep
         run: APP_VERSION="$version" ./build.sh
 
-      - name: 创建 GitHub Release 并上传
+      - name: 生成 Release 说明并发布
         env:
           GH_TOKEN: ${{ github.token }}
+          LANG: en_US.UTF-8
+          LC_ALL: en_US.UTF-8
         run: |
+          # 用仓库中的 UTF-8 模板生成说明（避免中文直接传入命令行参数导致编码损坏）
+          sed "s/__VERSION__/$version/g" release-notes.template.md > notes.md
           gh release create "v$version" LidKeep.zip \
             --title "LidKeep v$version" \
-            --notes "LidKeep v$version（手动构建发布）"
+            --notes-file notes.md
           echo "✅ Release 已发布：https://github.com/ownlight6/lidkeep/releases/tag/v$version"
